@@ -58,19 +58,26 @@ public class ProductController {
     void addProduct(@RequestBody MerchantProductDto merchantProductDto) {
 
         Product product = productService.get(merchantProductDto.getId());
+        System.out.println(merchantProductDto.getId());
+        System.out.println(product.getId());
         List<MerchantProductDto> merchantProductDtos = product.getMerchantProducts();
         boolean flag = false;
+        if(merchantProductDtos!=null) {
+            for (MerchantProductDto merchantProductDto2 : merchantProductDtos)
+                if (merchantProductDto2.getMerchantId().equals(merchantProductDto.getMerchantId())) {
 
-        for (MerchantProductDto merchantProductDto2 : merchantProductDtos)
-            if (merchantProductDto2.getMerchantId().equals(merchantProductDto.getMerchantId())) {
+                    BeanUtils.copyProperties(merchantProductDto, merchantProductDto2);
+                    product.setMerchantProducts(merchantProductDtos);
+                    flag = true;
+                    break;
 
-                BeanUtils.copyProperties(merchantProductDto, merchantProductDto2);
-                product.setMerchantProducts(merchantProductDtos);
-                flag = true;
-                break;
-
+                }
+            if (!flag) {
+                product.addMerchantProduct(merchantProductDto);
             }
-        if (!flag) {
+        }
+        else {
+            product.setMerchantProducts(new ArrayList<>() );
             product.addMerchantProduct(merchantProductDto);
         }
 
