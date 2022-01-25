@@ -6,6 +6,8 @@ import com.example.productService.dto.ProductMerchantReturnDto;
 import com.example.productService.entity.Product;
 import com.example.productService.service.ProductService;
 import net.minidev.json.writer.BeansMapper;
+import org.springframework.amqp.core.DirectExchange;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +22,12 @@ public class ProductController {
 
     @Autowired
     ProductService productService;
+
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
+
+    @Autowired
+    private DirectExchange exchange;
 
     @GetMapping("/{id}")
     ProductDto getProduct(@PathVariable String id) {
@@ -83,6 +91,7 @@ public class ProductController {
 
         product.sortMerchantProduct();
         productService.add(product);
+        rabbitTemplate.convertAndSend(exchange.getName(),"routing.ProductSearch",product);
 
     }
 
