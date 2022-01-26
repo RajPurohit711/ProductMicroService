@@ -3,16 +3,16 @@ package com.example.productService.controller;
 import com.example.productService.dto.MerchantProductDto;
 import com.example.productService.dto.ProductDto;
 import com.example.productService.dto.ProductMerchantReturnDto;
+import com.example.productService.dto.Tmp;
 import com.example.productService.entity.Product;
 import com.example.productService.service.ProductService;
-import net.minidev.json.writer.BeansMapper;
+import org.springframework.amqp.core.DirectExchange;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.ArrayList;
 import java.util.List;
-
 
 @RestController
 @RequestMapping(value = "/product")
@@ -20,6 +20,19 @@ public class ProductController {
 
     @Autowired
     ProductService productService;
+
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
+
+    @Autowired
+    private DirectExchange exchange;
+
+    @GetMapping(value = "/a")
+    void test()
+    {
+        Tmp tmp = new Tmp("name");
+        rabbitTemplate.convertAndSend(exchange.getName(),"routing.ProductSearch",tmp);
+    }
 
     @GetMapping("/{id}")
     ProductDto getProduct(@PathVariable String id) {
@@ -68,7 +81,6 @@ public class ProductController {
                 product.setMerchantProducts(merchantProductDtos);
                 flag = true;
                 break;
-
             }
         if (!flag) {
             product.addMerchantProduct(merchantProductDto);
@@ -76,6 +88,8 @@ public class ProductController {
 
         product.sortMerchantProduct();
         productService.add(product);
+        rabbitTemplate.convertAndSend(exchange.getName(),"routing.ProductSearch","abc");
+
 
     }
 
@@ -85,10 +99,9 @@ public class ProductController {
         List<MerchantProductDto> merchantProductDtos = product.getMerchantProducts();
         List<MerchantProductDto> merchantProductDtos1 = new ArrayList<>();
 
-
         for (MerchantProductDto merchantProductDto1 : merchantProductDtos) {
 
-            if (merchantProductDto1.getMerchantId() == merchantProductDto.getMerchantId()) {
+            if (merchantProductDto1.getMerchantId().equals(merchantProductDto.getMerchantId())) {
 
                 merchantProductDto1.setPrice(merchantProductDto.getPrice());
                 merchantProductDto1.setStock(merchantProductDto.getStock());
@@ -100,7 +113,6 @@ public class ProductController {
         product.setMerchantProducts(merchantProductDtos1);
 
         productService.add(product);
-
     }
 
     @GetMapping(value = "/getMerchantProducts/{merchantId}")
