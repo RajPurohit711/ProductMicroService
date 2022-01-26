@@ -11,6 +11,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 @RestController
@@ -102,14 +103,10 @@ public class ProductController {
 
             if (merchantProductDto1.getMerchantId().equals(merchantProductDto.getMerchantId())) {
 
-                merchantProductDto1.setPrice(merchantProductDto.getPrice());
-                merchantProductDto1.setStock(merchantProductDto.getStock());
-                merchantProductDto1.setWeight(merchantProductDto.getWeight());
+                BeanUtils.copyProperties(merchantProductDto,merchantProductDto1);
 
             }
-            merchantProductDtos1.add(merchantProductDto1);
         }
-        product.setMerchantProducts(merchantProductDtos1);
 
         productService.add(product);
     }
@@ -120,7 +117,6 @@ public class ProductController {
         List<ProductMerchantReturnDto> productMerchantReturnDtos = new ArrayList<>();
         List<Product> products = productService.getAll();
 
-
         try {
             for (Product product : products) {
 
@@ -129,7 +125,7 @@ public class ProductController {
                     ProductMerchantReturnDto productMerchantReturnDto = new ProductMerchantReturnDto();
 
                     for (MerchantProductDto merchantProductDto1 : merchantProductDtos)
-                        if (merchantProductDto1.getMerchantId()== merchantId) {
+                        if (merchantProductDto1.getMerchantId().equals(merchantId)) {
                             BeanUtils.copyProperties(merchantProductDto1,productMerchantReturnDto);
                             BeanUtils.copyProperties(product, productMerchantReturnDto);
 
@@ -149,14 +145,14 @@ public class ProductController {
 
     }
 
-    @RequestMapping(value ="/addInitialProduct" ,method = {RequestMethod.POST,RequestMethod.PUT})
-    void addInitialProduct(@RequestBody ProductDto initialProductDto){
-
-        Product product = new Product();
-        BeanUtils.copyProperties(initialProductDto,product);
-        productService.add(product);
-
-    }
+//    @RequestMapping(value ="/addInitialProduct" ,method = {RequestMethod.POST,RequestMethod.PUT})
+//    void addInitialProduct(@RequestBody ProductDto initialProductDto){
+//
+//        Product product = new Product();
+//        BeanUtils.copyProperties(initialProductDto,product);
+//        productService.add(product);
+//
+//    }
 
 
     @DeleteMapping(value = "/deleteProduct/{id}")
@@ -164,7 +160,6 @@ public class ProductController {
     {
         productService.delete(id);
     }
-
 
     @GetMapping(value = "/getProduct/{productId}/{merchantId}")
     ProductMerchantReturnDto getProduct(@PathVariable("productId") String productId,@PathVariable("merchantId")Long merchantId){
@@ -176,7 +171,7 @@ public class ProductController {
 
         for(MerchantProductDto merchantProductDto : merchantProductDtos){
             System.out.println(merchantProductDto.getMerchantId() + "outer" + merchantId);
-            if(merchantProductDto.getMerchantId()==merchantId){
+            if(merchantProductDto.getMerchantId().equals(merchantId)){
 
                 System.out.println(merchantProductDto.getMerchantId() + "dkfjkjdshfkjhdsf");
                 BeanUtils.copyProperties(product,productMerchantReturnDto);
@@ -187,4 +182,20 @@ public class ProductController {
         return productMerchantReturnDto;
     }
 
+
+
+//    @GetMapping(value = "/recommendations")
+//    List<ProductDto> getRecommendations(){
+//        List<Product> products = productService.getAll();
+//
+//        List<ProductDto> productDtos = new ArrayList<>();
+//        int i =0;
+//
+////        public void sortMerchantProduct(){
+////            merchantProducts.sort(Comparator.comparing(MerchantProductDto::getPrice));
+////        }
+//
+//
+//        productDtos.sort(Comparator.comparing());
+//    }
 }

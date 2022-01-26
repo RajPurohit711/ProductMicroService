@@ -14,12 +14,10 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class RabitConfig {
-    public static final String ROUTING_PRODUCT_SEARCH ="routing.ProductSearch";
+    static final String ROUTING_PRODUCT_SEARCH ="routing.ProductSearch";
 
 
-    public static final String ROUTING_ORDER_PRODUCT ="routing.OrderProduct";
-
-
+    static final String ROUTING_ORDER_PRODUCT ="routing.OrderProduct";
 
     @Bean
     Queue queueProductSearch(){
@@ -36,7 +34,6 @@ public class RabitConfig {
         return BindingBuilder.bind(queueProductSearch).to(exchange).with(ROUTING_PRODUCT_SEARCH);
     }
 
-
     @Bean
     Queue queueOrderProduct(){
         return new Queue("queue.OrderProduct",false);
@@ -46,7 +43,6 @@ public class RabitConfig {
     Binding bindingOrderProduct(Queue queueOrderProduct, DirectExchange exchange){
         return BindingBuilder.bind(queueOrderProduct).to(exchange).with(ROUTING_ORDER_PRODUCT);
     }
-
 
     @Bean
     MessageConverter messageConverter(){

@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 @RestController
@@ -66,6 +67,27 @@ public class CategoryController {
         categoryService.add(category);
     }
 
+
+    @GetMapping(value = "/recommendations")
+    List<ProductDto> getRecommendations(){
+
+        List<Category> categories = categoryService.getAll();
+        List<ProductDto> productDtos = new ArrayList<>();
+        for(Category category:categories){
+
+            List<Product> products1 = productService.findByCategory(category.getName());
+            int i = 0;
+            for(Product product: products1){
+                if(i==2)
+                    break;
+                ProductDto productDto = new ProductDto();
+                BeanUtils.copyProperties(product,productDto);
+                productDtos.add(productDto);
+                i++;
+            }
+        }
+        return productDtos;
+    }
 
 
 }
