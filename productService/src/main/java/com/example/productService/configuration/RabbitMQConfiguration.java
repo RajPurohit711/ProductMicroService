@@ -1,5 +1,4 @@
-
-package com.example.productService.config;
+package com.example.productService.configuration;
 
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
@@ -13,18 +12,16 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class RabitConfig {
+public class RabbitMQConfiguration {
     public static final String ROUTING_PRODUCT_SEARCH ="routing.ProductSearch";
-
-
-    public static final String ROUTING_ORDER_PRODUCT ="routing.OrderProduct";
-
-
 
     @Bean
     Queue queueProductSearch(){
         return new Queue("queue.ProductSearch",false);
     }
+
+
+
 
     @Bean
     DirectExchange exchange(){
@@ -35,18 +32,6 @@ public class RabitConfig {
     Binding bindingOrderEmail(Queue queueProductSearch, DirectExchange exchange){
         return BindingBuilder.bind(queueProductSearch).to(exchange).with(ROUTING_PRODUCT_SEARCH);
     }
-
-
-    @Bean
-    Queue queueOrderProduct(){
-        return new Queue("queue.OrderProduct",false);
-    }
-
-    @Bean
-    Binding bindingOrderProduct(Queue queueOrderProduct, DirectExchange exchange){
-        return BindingBuilder.bind(queueOrderProduct).to(exchange).with(ROUTING_ORDER_PRODUCT);
-    }
-
 
     @Bean
     MessageConverter messageConverter(){

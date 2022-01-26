@@ -3,7 +3,6 @@ package com.example.productService.controller;
 import com.example.productService.dto.MerchantProductDto;
 import com.example.productService.dto.ProductDto;
 import com.example.productService.dto.ProductMerchantReturnDto;
-import com.example.productService.dto.Tmp;
 import com.example.productService.entity.Product;
 import com.example.productService.service.ProductService;
 import org.springframework.amqp.core.DirectExchange;
@@ -26,13 +25,6 @@ public class ProductController {
 
     @Autowired
     private DirectExchange exchange;
-
-    @GetMapping(value = "/a")
-    void test()
-    {
-        Tmp tmp = new Tmp("name");
-        rabbitTemplate.convertAndSend(exchange.getName(),"routing.ProductSearch",tmp);
-    }
 
     @GetMapping("/{id}")
     ProductDto getProduct(@PathVariable String id) {
@@ -71,25 +63,32 @@ public class ProductController {
     void addProduct(@RequestBody MerchantProductDto merchantProductDto) {
 
         Product product = productService.get(merchantProductDto.getId());
+        System.out.println(merchantProductDto.getId());
+        System.out.println(product.getId());
         List<MerchantProductDto> merchantProductDtos = product.getMerchantProducts();
         boolean flag = false;
-
-        for (MerchantProductDto merchantProductDto2 : merchantProductDtos)
-            if (merchantProductDto2.getMerchantId().equals(merchantProductDto.getMerchantId())) {
+        if(merchantProductDtos!=null) {
+            for (MerchantProductDto merchantProductDto2 : merchantProductDtos)
+                if (merchantProductDto2.getMerchantId().equals(merchantProductDto.getMerchantId())) {
 
                 BeanUtils.copyProperties(merchantProductDto, merchantProductDto2);
                 product.setMerchantProducts(merchantProductDtos);
                 flag = true;
                 break;
+
+                }
+            if (!flag) {
+                product.addMerchantProduct(merchantProductDto);
             }
-        if (!flag) {
+        }
+        else {
+            product.setMerchantProducts(new ArrayList<>() );
             product.addMerchantProduct(merchantProductDto);
         }
 
         product.sortMerchantProduct();
         productService.add(product);
-        rabbitTemplate.convertAndSend(exchange.getName(),"routing.ProductSearch","abc");
-
+        rabbitTemplate.convertAndSend(exchange.getName(),"routing.ProductSearch",product);
 
     }
 
