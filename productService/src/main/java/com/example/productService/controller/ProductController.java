@@ -5,16 +5,13 @@ import com.example.productService.dto.ProductDto;
 import com.example.productService.dto.ProductMerchantReturnDto;
 import com.example.productService.entity.Product;
 import com.example.productService.service.ProductService;
-import net.minidev.json.writer.BeansMapper;
 import org.springframework.amqp.core.DirectExchange;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.ArrayList;
 import java.util.List;
-
 
 @RestController
 @RequestMapping(value = "/product")
@@ -74,10 +71,10 @@ public class ProductController {
             for (MerchantProductDto merchantProductDto2 : merchantProductDtos)
                 if (merchantProductDto2.getMerchantId().equals(merchantProductDto.getMerchantId())) {
 
-                    BeanUtils.copyProperties(merchantProductDto, merchantProductDto2);
-                    product.setMerchantProducts(merchantProductDtos);
-                    flag = true;
-                    break;
+                BeanUtils.copyProperties(merchantProductDto, merchantProductDto2);
+                product.setMerchantProducts(merchantProductDtos);
+                flag = true;
+                break;
 
                 }
             if (!flag) {
@@ -101,10 +98,9 @@ public class ProductController {
         List<MerchantProductDto> merchantProductDtos = product.getMerchantProducts();
         List<MerchantProductDto> merchantProductDtos1 = new ArrayList<>();
 
-
         for (MerchantProductDto merchantProductDto1 : merchantProductDtos) {
 
-            if (merchantProductDto1.getMerchantId() == merchantProductDto.getMerchantId()) {
+            if (merchantProductDto1.getMerchantId().equals(merchantProductDto.getMerchantId())) {
 
                 merchantProductDto1.setPrice(merchantProductDto.getPrice());
                 merchantProductDto1.setStock(merchantProductDto.getStock());
@@ -116,7 +112,6 @@ public class ProductController {
         product.setMerchantProducts(merchantProductDtos1);
 
         productService.add(product);
-
     }
 
     @GetMapping(value = "/getMerchantProducts/{merchantId}")
